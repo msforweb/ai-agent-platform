@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
 import dotenv from "dotenv";
+import chatRoutes from "./modules/chat/chat.routes.js";
 
 dotenv.config();
 
@@ -24,6 +25,8 @@ app.get("/health", (_req, res) => {
     uptime: process.uptime(),
   });
 });
+
+app.use("/api/v1/chat", chatRoutes);
 
 app.use((_req, res) => {
   res.status(404).json({
