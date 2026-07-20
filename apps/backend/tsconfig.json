@@ -4,12 +4,6 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
-
-    "baseUrl": "./src",
-
-    "paths": {
-      "@/*": ["*"]
-    }
   },
 
   "include": ["src"]

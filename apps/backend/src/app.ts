@@ -4,11 +4,14 @@ import helmet from "helmet";
 import compression from "compression";
 import dotenv from "dotenv";
 import chatRoutes from "./modules/chat/chat.routes.js";
+import { requestLogger } from "./config/middleware/request-logger.js";
+import { errorHandler } from "./config/middleware/error-handler.js";
 
 dotenv.config();
 
 export const app = express();
 
+app.use(requestLogger);
 app.use(cors());
 app.use(helmet());
 app.use(compression());
@@ -34,3 +37,5 @@ app.use((_req, res) => {
     message: "Route not found",
   });
 });
+
+app.use(errorHandler);
