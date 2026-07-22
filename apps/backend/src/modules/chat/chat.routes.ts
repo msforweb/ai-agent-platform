@@ -1,10 +1,10 @@
 import { Router } from "express";
 
-import { ChatController } from "./chat.controller.js";
+import { application } from "../../bootstrap/application.js";
 
 const router = Router();
 
-const controller = new ChatController();
+const controller = application.chatController;
 
 router.post("/", controller.chat);
 

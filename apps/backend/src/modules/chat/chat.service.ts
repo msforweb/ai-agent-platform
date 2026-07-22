@@ -1,9 +1,9 @@
 import { HumanMessage } from "@langchain/core/messages";
 
-import { OpenRouterProvider } from "../../ai/providers/openrouter.provider.js";
+import { LLMProvider } from "../../ai/interfaces/llm-provider.interface.js";
 
 export class ChatService {
-  private readonly provider = new OpenRouterProvider();
+  constructor(private readonly provider: LLMProvider) {}
 
   async chat(message: string): Promise<string> {
     const response = await this.provider.invoke([
