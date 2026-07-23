@@ -8,9 +8,13 @@ export class ChatController {
   constructor(private readonly service: ChatService) {}
 
   chat = asyncHandler(async (req: Request, res: Response) => {
-    const { message } = ChatRequestSchema.parse(req.body);
+    const { conversationId, message } = ChatRequestSchema.parse(req.body);
 
-    const reply = await this.service.chat(message);
+
+    const reply = await this.service.chat(
+      conversationId, 
+      message
+    );
 
     res.json({
       success: true,

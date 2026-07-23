@@ -1,15 +1,40 @@
-import { HumanMessage } from "@langchain/core/messages";
-
-import { LLMProvider } from "../../ai/interfaces/llm-provider.interface.js";
+import { Agent } from "../../ai/interfaces/agent.interface.js";
+import { ChatStore } from "./interfaces/chat-store.interface.js";
 
 export class ChatService {
-  constructor(private readonly provider: LLMProvider) {}
+  constructor(
+    private readonly agent: Agent,
+    private readonly chatStore: ChatStore
+  ) {}
 
-  async chat(message: string): Promise<string> {
-    const response = await this.provider.invoke([
-      new HumanMessage(message),
-    ]);
+  async chat(
+    conversationId: string,
+    message: string
+  ): Promise<string> {
 
-    return response.content.toString();
+    let conversation =
+      this.chatStore.getConversation(conversationId);
+
+    if (!conversation) {
+      conversation =
+        this.chatStore.createConversation(conversationId);
+    }
+
+    conversation.messages.push({
+      role: "user",
+      content: message,
+    });
+
+    const reply =
+      await this.agent.chat(conversation);
+
+    conversation.messages.push({
+      role: "assistant",
+      content: reply,
+    });
+
+    this.chatStore.saveConversation(conversation);
+
+    return reply;
   }
 }
