@@ -4,8 +4,8 @@ import { application } from "../../bootstrap/application.js";
 
 const router = Router();
 
-const controller = application.chatController;
+router.post("/", application.chatController.chat);
 
-router.post("/", controller.chat);
+router.post("/stream", application.chatStreamController.stream);
 
 export default router;

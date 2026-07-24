@@ -1,36 +1,39 @@
-// TODO: OpenRouter provider implementation
 import { ChatOpenAI } from "@langchain/openai";
-import { AIMessage, BaseMessage } from "@langchain/core/messages";
+import {
+  AIMessage,
+  AIMessageChunk,
+  BaseMessage,
+} from "@langchain/core/messages";
 
 import { env } from "../../config/env.js";
 import { LLMProvider } from "../interfaces/llm-provider.interface.js";
 
 export class OpenRouterProvider implements LLMProvider {
+  private readonly model: ChatOpenAI;
 
-    private readonly model: ChatOpenAI;
+  constructor() {
+    this.model = new ChatOpenAI({
+      apiKey: env.OPENROUTER_API_KEY,
 
-    constructor() {
+      model: env.OPENROUTER_MODEL,
 
-        this.model = new ChatOpenAI({
+      configuration: {
+        baseURL: env.OPENROUTER_BASE_URL,
+      },
+    });
+  }
 
-            apiKey: env.OPENROUTER_API_KEY,
+  async invoke(messages: BaseMessage[]): Promise<AIMessage> {
+    return await this.model.invoke(messages);
+  }
 
-            model: env.OPENROUTER_MODEL,
+  async *stream(
+    messages: BaseMessage[]
+  ): AsyncGenerator<AIMessageChunk> {
+    const stream = await this.model.stream(messages);
 
-            configuration: {
-
-                baseURL: env.OPENROUTER_BASE_URL,
-
-            },
-
-        });
-
+    for await (const chunk of stream) {
+      yield chunk;
     }
-
-    async invoke(messages: BaseMessage[]): Promise<AIMessage> {
-
-        return await this.model.invoke(messages);
-
-    }
-
+  }
 }

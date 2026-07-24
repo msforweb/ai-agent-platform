@@ -1,4 +1,4 @@
-import { Conversation } from "../../modules/chat/types/conversation.js";
+import { Conversation } from "../types/conversation.js";
 
 export interface ChatStore {
   getConversation(id: string): Conversation | undefined;

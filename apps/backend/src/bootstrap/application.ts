@@ -2,6 +2,7 @@ import { SimpleChatAgent } from "../ai/agents/simple-chat.agent.js";
 import { OpenRouterProvider } from "../ai/providers/openrouter.provider.js";
 
 import { ChatController } from "../modules/chat/chat.controller.js";
+import { ChatStreamController } from "../modules/chat/chat-stream.controller.js";
 import { InMemoryChatStore } from "../modules/chat/memory/in-memory-chat-store.js";
 import { ChatService } from "../modules/chat/chat.service.js";
 
@@ -21,6 +22,9 @@ const chatService = new ChatService(
 // Controllers
 const chatController = new ChatController(chatService);
 
+const chatStreamController = new ChatStreamController(chatService);
+
 export const application = {
   chatController,
+  chatStreamController,
 };

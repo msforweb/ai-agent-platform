@@ -1,4 +1,9 @@
-import { AIMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
+import {
+  AIMessage,
+  AIMessageChunk,
+  HumanMessage,
+  SystemMessage,
+} from "@langchain/core/messages";
 
 import { LLMProvider } from "../interfaces/llm-provider.interface.js";
 import { Agent } from "../interfaces/agent.interface.js";
@@ -10,12 +15,9 @@ export class SimpleChatAgent implements Agent {
     private readonly provider: LLMProvider
   ) {}
 
-  async chat(conversation: Conversation): Promise<string> {
-
-    const messages = conversation.messages.map((message) => {
-
+  private buildMessages(conversation: Conversation) {
+    return conversation.messages.map((message) => {
       switch (message.role) {
-
         case "system":
           return new SystemMessage(message.content);
 
@@ -25,12 +27,24 @@ export class SimpleChatAgent implements Agent {
         default:
           return new HumanMessage(message.content);
       }
-
     });
+  }
+
+  async chat(conversation: Conversation): Promise<string> {
+    const messages = this.buildMessages(conversation);
 
     const response = await this.provider.invoke(messages);
 
     return response.content.toString();
+  }
 
+  async *stream(
+    conversation: Conversation
+  ): AsyncGenerator<AIMessageChunk> {
+    const messages = this.buildMessages(conversation);
+
+    for await (const chunk of this.provider.stream(messages)) {
+      yield chunk;
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { ChatStore } from "../../../ai/interfaces/chat-store.interface.js";
+import { ChatStore } from "../interfaces/chat-store.interface.js";
 import { Conversation } from "../types/conversation.js";
 
 export class InMemoryChatStore implements ChatStore {
