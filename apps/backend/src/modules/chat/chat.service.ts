@@ -1,11 +1,12 @@
 import { AIMessageChunk } from "@langchain/core/messages";
 
-import { Agent } from "../../ai/interfaces/agent.interface.js";
+//import { Agent } from "../../ai/interfaces/agent.interface.js";
+import { AgentRuntime } from "../../ai/runtime/agent-runtime.js";
 import { ChatStore } from "./interfaces/chat-store.interface.js";
 
 export class ChatService {
   constructor(
-    private readonly agent: Agent,
+    private readonly runtime: AgentRuntime,
     private readonly chatStore: ChatStore
   ) {}
 
@@ -24,7 +25,7 @@ export class ChatService {
       content: message,
     });
 
-    const reply = await this.agent.chat(conversation);
+    const reply = await this.runtime.chat(conversation);
 
     conversation.messages.push({
       role: "assistant",
@@ -53,7 +54,7 @@ export class ChatService {
 
     let fullResponse = "";
 
-    for await (const chunk of this.agent.stream(conversation)) {
+    for await (const chunk of this.runtime.stream(conversation)) {
       const content =
         typeof chunk.content === "string"
           ? chunk.content

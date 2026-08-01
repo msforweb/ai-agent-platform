@@ -1,4 +1,9 @@
-import { SimpleChatAgent } from "../ai/agents/simple-chat.agent.js";
+//import { SimpleChatAgent } from "../ai/agents/simple-chat.agent.js";
+import { LangGraphAgent } from "../ai/agents/langgraph.agent.js";
+import { LLMNode } from "../ai/graph/nodes/llm.node.js";
+import { ChatGraph } from "../ai/graph/graphs/chat.graph.js";
+
+import { SimpleAgentRuntime } from "../ai/runtime/simple-agent-runtime.js";
 import { OpenRouterProvider } from "../ai/providers/openrouter.provider.js";
 
 import { ChatController } from "../modules/chat/chat.controller.js";
@@ -10,12 +15,19 @@ import { ChatService } from "../modules/chat/chat.service.js";
 const provider = new OpenRouterProvider();
 const chatStore = new InMemoryChatStore();
 
+// Graph
+const llmNode = new LLMNode(provider);
+const chatGraph = new ChatGraph(llmNode);
+
 // AI
-const chatAgent = new SimpleChatAgent(provider);
+const chatAgent = new LangGraphAgent(chatGraph);
+
+// Runtime
+const agentRuntime = new SimpleAgentRuntime(chatAgent);
 
 // Services
 const chatService = new ChatService(
-  chatAgent,
+  agentRuntime,
   chatStore
 );
 

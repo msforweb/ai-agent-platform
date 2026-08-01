@@ -1,6 +1,9 @@
 node_modules/
 dist/
 
+# Test coverage
+coverage/
+
 apps/backend/.env
 apps/backend/.env.*
 
