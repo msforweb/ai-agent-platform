@@ -4,13 +4,13 @@ import { InMemoryChatStore } from "../../../src/modules/chat/memory/in-memory-ch
 
 describe("InMemoryChatStore", () => {
 
-  it("should create a new conversation", () => {
+  it("should create a new conversation", async () => {
 
     // Arrange
     const store = new InMemoryChatStore();
 
     // Act
-    const conversation = store.createConversation("conversation-1");
+    const conversation = await store.createConversation("conversation-1");
 
     // Assert
     expect(conversation.id).toBe("conversation-1");
@@ -18,12 +18,12 @@ describe("InMemoryChatStore", () => {
 
   });
 
-  it("should save and retrieve a conversation", () => {
+  it("should save and retrieve a conversation", async () => {
 
     // Arrange
     const store = new InMemoryChatStore();
 
-    const conversation = store.createConversation("conversation-1");
+    const conversation = await store.createConversation("conversation-1");
 
     conversation.messages.push({
       role: "user",
@@ -31,24 +31,24 @@ describe("InMemoryChatStore", () => {
     });
 
     // Act
-    store.saveConversation(conversation);
+    await store.saveConversation(conversation);
 
     const loadedConversation =
-      store.getConversation("conversation-1");
+      await store.getConversation("conversation-1");
 
     // Assert
     expect(loadedConversation).toEqual(conversation);
 
   });
 
-  it("should return undefined for an unknown conversation", () => {
+  it("should return undefined for an unknown conversation", async () => {
 
     // Arrange
     const store = new InMemoryChatStore();
 
     // Act
     const conversation =
-      store.getConversation("unknown");
+      await store.getConversation("unknown");
 
     // Assert
     expect(conversation).toBeUndefined();

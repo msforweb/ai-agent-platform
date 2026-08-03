@@ -1,9 +1,15 @@
 import { Conversation } from "../types/conversation.js";
 
 export interface ChatStore {
-  getConversation(id: string): Conversation | undefined;
+  getConversation(
+    id: string
+  ): Promise<Conversation | undefined>;
 
-  saveConversation(conversation: Conversation): void;
+  saveConversation(
+    conversation: Conversation
+  ): Promise<void>;
 
-  createConversation(id: string): Conversation;
+  createConversation(
+    id: string
+  ): Promise<Conversation>;
 }

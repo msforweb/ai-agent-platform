@@ -9,3 +9,39 @@ apps/backend/.env.*
 
 !.env.example
 !apps/backend/.env.example
+
+# AI IDE metadata
+apps/backend/.agents/
+apps/backend/.claude/
+apps/backend/.windsurf/
+apps/backend/.cursor/
+apps/backend/skills-lock.json
+
+# IDE
+.idea/
+
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+
+# Node
+node_modules/
+
+# Prisma
+prisma/dev.db
+
+# Coverage
+coverage/
+
+# Build
+dist/
+
+# Environment
+apps/backend/.env
+apps/backend/.env.*
+
+.env
+.env.local
+.env.*
+!.env.example
+!apps/backend/.env.example

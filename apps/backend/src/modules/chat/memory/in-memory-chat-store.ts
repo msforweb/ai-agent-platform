@@ -4,21 +4,21 @@ import { Conversation } from "../types/conversation.js";
 export class InMemoryChatStore implements ChatStore {
   private readonly conversations = new Map<string, Conversation>();
 
-  getConversation(id: string): Conversation | undefined {
+  async getConversation(id: string): Promise<Conversation | undefined> {
     return this.conversations.get(id);
   }
 
-  saveConversation(conversation: Conversation): void {
+  async saveConversation(conversation: Conversation): Promise<void> {
     this.conversations.set(conversation.id, conversation);
   }
 
-  createConversation(id: string): Conversation {
+  async createConversation(id: string): Promise<Conversation> {
     const conversation: Conversation = {
       id,
       messages: [],
     };
 
-    this.saveConversation(conversation);
+    await this.saveConversation(conversation);
 
     return conversation;
   }

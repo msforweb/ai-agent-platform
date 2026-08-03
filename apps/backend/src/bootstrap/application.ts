@@ -8,12 +8,14 @@ import { OpenRouterProvider } from "../ai/providers/openrouter.provider.js";
 
 import { ChatController } from "../modules/chat/chat.controller.js";
 import { ChatStreamController } from "../modules/chat/chat-stream.controller.js";
-import { InMemoryChatStore } from "../modules/chat/memory/in-memory-chat-store.js";
+//import { InMemoryChatStore } from "../modules/chat/memory/in-memory-chat-store.js";
+import { prisma } from "../infrastructure/database/prisma.service.js";
+import { PostgresChatStore } from "../modules/chat/memory/postgres-chat-store.js";
 import { ChatService } from "../modules/chat/chat.service.js";
 
 // Infrastructure
 const provider = new OpenRouterProvider();
-const chatStore = new InMemoryChatStore();
+const chatStore = new PostgresChatStore(prisma);
 
 // Graph
 const llmNode = new LLMNode(provider);

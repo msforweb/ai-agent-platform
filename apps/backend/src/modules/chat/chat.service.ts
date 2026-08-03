@@ -1,6 +1,5 @@
 import { AIMessageChunk } from "@langchain/core/messages";
 
-//import { Agent } from "../../ai/interfaces/agent.interface.js";
 import { AgentRuntime } from "../../ai/runtime/agent-runtime.js";
 import { ChatStore } from "./interfaces/chat-store.interface.js";
 
@@ -14,10 +13,11 @@ export class ChatService {
     conversationId: string,
     message: string
   ): Promise<string> {
-    let conversation = this.chatStore.getConversation(conversationId);
+
+    let conversation = await this.chatStore.getConversation(conversationId);
 
     if (!conversation) {
-      conversation = this.chatStore.createConversation(conversationId);
+      conversation = await this.chatStore.createConversation(conversationId);
     }
 
     conversation.messages.push({
@@ -32,7 +32,7 @@ export class ChatService {
       content: reply,
     });
 
-    this.chatStore.saveConversation(conversation);
+    await this.chatStore.saveConversation(conversation);
 
     return reply;
   }
@@ -41,10 +41,11 @@ export class ChatService {
     conversationId: string,
     message: string
   ): AsyncGenerator<AIMessageChunk> {
-    let conversation = this.chatStore.getConversation(conversationId);
+
+    let conversation = await this.chatStore.getConversation(conversationId);
 
     if (!conversation) {
-      conversation = this.chatStore.createConversation(conversationId);
+      conversation = await this.chatStore.createConversation(conversationId);
     }
 
     conversation.messages.push({
@@ -70,6 +71,6 @@ export class ChatService {
       content: fullResponse,
     });
 
-    this.chatStore.saveConversation(conversation);
+    await this.chatStore.saveConversation(conversation);
   }
 }
