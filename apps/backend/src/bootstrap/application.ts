@@ -12,10 +12,14 @@ import { ChatStreamController } from "../modules/chat/chat-stream.controller.js"
 import { prisma } from "../infrastructure/database/prisma.service.js";
 import { PostgresChatStore } from "../modules/chat/memory/postgres-chat-store.js";
 import { ChatService } from "../modules/chat/chat.service.js";
+import { DefaultMemoryManager } from "../ai/memory/memory-manager.js";
+import { SimpleTokenCounter } from "../ai/memory/token-counter.js";
 
 // Infrastructure
 const provider = new OpenRouterProvider();
 const chatStore = new PostgresChatStore(prisma);
+const tokenCounter = new SimpleTokenCounter();
+const memoryManager = new DefaultMemoryManager(tokenCounter);
 
 // Graph
 const llmNode = new LLMNode(provider);
@@ -30,7 +34,8 @@ const agentRuntime = new SimpleAgentRuntime(chatAgent);
 // Services
 const chatService = new ChatService(
   agentRuntime,
-  chatStore
+  chatStore,
+  memoryManager
 );
 
 // Controllers

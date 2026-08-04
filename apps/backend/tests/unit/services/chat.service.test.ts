@@ -4,11 +4,13 @@ import { ChatService } from "../../../src/modules/chat/chat.service.js";
 import { Conversation } from "../../../src/modules/chat/types/conversation.js";
 import { Agent } from "../../../src/ai/interfaces/agent.interface.js";
 import { ChatStore } from "../../../src/modules/chat/interfaces/chat-store.interface.js";
+import { MemoryManager } from "../../../src/ai/memory/interfaces/memory-manager.interface.js";
 
 describe("ChatService", () => {
   let mockAgent: Agent;
   let mockStore: ChatStore;
   let service: ChatService;
+  let mockMemoryManager: MemoryManager;
 
   beforeEach(() => {
     mockAgent = {
@@ -27,9 +29,14 @@ describe("ChatService", () => {
       saveConversation: vi.fn(),
     };
 
+    mockMemoryManager = {
+      prepareConversation: vi.fn(async conversation => conversation),
+    };
+    
     service = new ChatService(
       mockAgent,
-      mockStore
+      mockStore,
+      mockMemoryManager
     );
   });
 
@@ -38,7 +45,7 @@ describe("ChatService", () => {
       "conversation-1",
       "Hello"
     );
-
+    
     expect(reply).toBe("Hello from AI");
 
     expect(mockStore.getConversation)
@@ -49,6 +56,9 @@ describe("ChatService", () => {
 
     expect(mockAgent.chat)
       .toHaveBeenCalledTimes(1);
+    
+    expect(mockMemoryManager.prepareConversation)
+      .toHaveBeenCalledTimes(1);  
 
     const savedConversation =
       vi.mocked(mockStore.saveConversation).mock.calls[0][0];
@@ -147,5 +157,8 @@ describe("ChatService", () => {
       role: "assistant",
       content: "Hello World!",
     });
+
+    expect(mockMemoryManager.prepareConversation)
+      .toHaveBeenCalledTimes(1);  
   });
 });
