@@ -1,20 +1,46 @@
-import { Conversation } from "../../modules/chat/types/conversation.js";
+import { Conversation, ConversationMessage } from "../../modules/chat/types/conversation.js";
 import { TokenCounter } from "./interfaces/token-counter.interface.js";
 import { MemoryManager } from "./interfaces/memory-manager.interface.js";
 import { MEMORY_CONFIG } from "./memory.config.js";
+import { Summarizer } from "./interfaces/summarizer.interface.js";
+
+
+const RECENT_MESSAGE_COUNT = 8;
 
 export class DefaultMemoryManager implements MemoryManager {
 
   constructor(
-    private readonly tokenCounter: TokenCounter
+    private readonly tokenCounter: TokenCounter,
+    private readonly summarizer: Summarizer
   ) {}
+  
 
   async prepareConversation(
     conversation: Conversation
   ): Promise<Conversation> {
 
+    const recentMessages =
+      conversation.messages.slice(-RECENT_MESSAGE_COUNT);
+
+    const oldMessages =
+      conversation.messages.slice(0, -RECENT_MESSAGE_COUNT);  
+
+    const oldConversationText = oldMessages
+        .map(message => `${message.role}: ${message.content}`)
+        .join("\n");  
+    
+    const summary =
+      await this.summarizer.summarize(
+        oldConversationText
+      );
+    
+    const summaryMessage: ConversationMessage = {
+      role: "system",
+      content: `Conversation summary:\n\n${summary}`,
+    };  
+
     const text = conversation.messages
-      .map(message => message.content)
+      .map(message => `${message.role}: ${message.content}`)
       .join("\n");
 
     const tokens =
@@ -30,7 +56,14 @@ export class DefaultMemoryManager implements MemoryManager {
 
     console.log(`Conversation tokens: ${tokens}`);
 
-    return conversation;
+    //return conversation;
+    return {
+      ...conversation,
+      messages: [
+        summaryMessage,
+        ...recentMessages,
+      ],
+    };
   }
 
 }

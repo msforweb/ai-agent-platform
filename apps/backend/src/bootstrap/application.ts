@@ -14,12 +14,14 @@ import { PostgresChatStore } from "../modules/chat/memory/postgres-chat-store.js
 import { ChatService } from "../modules/chat/chat.service.js";
 import { DefaultMemoryManager } from "../ai/memory/memory-manager.js";
 import { SimpleTokenCounter } from "../ai/memory/token-counter.js";
+import { LLMSummarizer } from "../ai/memory/llm-summarizer.js";
 
 // Infrastructure
 const provider = new OpenRouterProvider();
 const chatStore = new PostgresChatStore(prisma);
 const tokenCounter = new SimpleTokenCounter();
-const memoryManager = new DefaultMemoryManager(tokenCounter);
+const summarizer = new LLMSummarizer(provider);
+const memoryManager = new DefaultMemoryManager(tokenCounter, summarizer);
 
 // Graph
 const llmNode = new LLMNode(provider);
