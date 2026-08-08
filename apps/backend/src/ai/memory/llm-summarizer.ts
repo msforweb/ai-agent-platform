@@ -11,9 +11,27 @@ export class LLMSummarizer implements Summarizer {
   async summarize(text: string): Promise<string> {
     const response = await this.provider.invoke([
       new SystemMessage(
-        `You summarize conversations for long-term memory.
-Keep important facts, decisions, user preferences, and unresolved tasks.
-Produce a concise summary.`
+      `You are maintaining long-term memory for an AI assistant.
+
+      Create a concise summary of the conversation.
+
+      Keep:
+      - user goals
+      - user preferences
+      - important facts
+      - important decisions
+      - unresolved questions
+      - context that will help future conversations
+
+      Remove:
+      - greetings
+      - repetition
+      - small talk
+      - filler text
+
+      Write the summary as a short factual paragraph.
+      Do not invent information.
+      Preserve important technical details when relevant.`
       ),
       new HumanMessage(text),
     ]);

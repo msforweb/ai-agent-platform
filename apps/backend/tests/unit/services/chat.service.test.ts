@@ -61,7 +61,7 @@ describe("ChatService", () => {
       .toHaveBeenCalledTimes(1);  
 
     const savedConversation =
-      vi.mocked(mockStore.saveConversation).mock.calls[0][0];
+      vi.mocked(mockStore.saveConversation).mock.calls[1][0];
 
     expect(savedConversation.messages).toHaveLength(2);
 
@@ -76,7 +76,7 @@ describe("ChatService", () => {
     });
 
     expect(mockStore.saveConversation)
-      .toHaveBeenCalledTimes(1);
+      .toHaveBeenCalledTimes(2);
   });
 
   it("should use an existing conversation", async () => {
@@ -141,10 +141,10 @@ describe("ChatService", () => {
     ]);
 
     expect(mockStore.saveConversation)
-      .toHaveBeenCalledTimes(1);
+      .toHaveBeenCalledTimes(2);
 
     const savedConversation =
-      vi.mocked(mockStore.saveConversation).mock.calls[0][0];
+      vi.mocked(mockStore.saveConversation).mock.calls[1][0];
 
     expect(savedConversation.messages).toHaveLength(2);
 

@@ -28,6 +28,10 @@ export class ChatService {
     });
     const optimizedConversation = await this.memoryManager.prepareConversation(conversation);
 
+    conversation = optimizedConversation;
+
+    this.chatStore.saveConversation(conversation);
+
     const reply = await this.runtime.chat(optimizedConversation);
 
     conversation.messages.push({
@@ -57,6 +61,10 @@ export class ChatService {
     });
 
     const optimizedConversation = await this.memoryManager.prepareConversation(conversation);
+
+    conversation = optimizedConversation;
+
+    this.chatStore.saveConversation(conversation);
 
     let fullResponse = "";
 
