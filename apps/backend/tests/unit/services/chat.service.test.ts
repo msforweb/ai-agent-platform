@@ -5,12 +5,14 @@ import { Conversation } from "../../../src/modules/chat/types/conversation.js";
 import { Agent } from "../../../src/ai/interfaces/agent.interface.js";
 import { ChatStore } from "../../../src/modules/chat/interfaces/chat-store.interface.js";
 import { MemoryManager } from "../../../src/ai/memory/interfaces/memory-manager.interface.js";
+import { MemoryService } from "../../../src/modules/memory/memory.service.js";
 
 describe("ChatService", () => {
   let mockAgent: Agent;
   let mockStore: ChatStore;
   let service: ChatService;
   let mockMemoryManager: MemoryManager;
+  let mockMemoryService: MemoryService;
 
   beforeEach(() => {
     mockAgent = {
@@ -33,10 +35,16 @@ describe("ChatService", () => {
       prepareConversation: vi.fn(async conversation => conversation),
     };
     
+    mockMemoryService = {
+      findRelevant: vi.fn().mockResolvedValue([]),
+      remember: vi.fn().mockResolvedValue(undefined),
+    } as unknown as MemoryService;
+
     service = new ChatService(
       mockAgent,
       mockStore,
-      mockMemoryManager
+      mockMemoryManager,
+      mockMemoryService
     );
   });
 

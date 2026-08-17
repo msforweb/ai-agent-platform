@@ -15,6 +15,9 @@ import { ChatService } from "../modules/chat/chat.service.js";
 import { DefaultMemoryManager } from "../ai/memory/memory-manager.js";
 import { SimpleTokenCounter } from "../ai/memory/token-counter.js";
 import { LLMSummarizer } from "../ai/memory/llm-summarizer.js";
+import { LocalEmbeddingProvider } from "../modules/memory/providers/local-embedding.provider.js";
+import { PostgresMemoryStore } from "../modules/memory/stores/postgres-memory.store.js";
+import { MemoryService } from "../modules/memory/memory.service.js";
 
 // Infrastructure
 const provider = new OpenRouterProvider();
@@ -33,11 +36,24 @@ const chatAgent = new LangGraphAgent(chatGraph);
 // Runtime
 const agentRuntime = new SimpleAgentRuntime(chatAgent);
 
+const embeddingProvider =
+  new LocalEmbeddingProvider();
+
+const memoryStore =
+  new PostgresMemoryStore(prisma);
+
+const memoryService =
+  new MemoryService(
+    memoryStore,
+    embeddingProvider
+  );
+
 // Services
 const chatService = new ChatService(
   agentRuntime,
   chatStore,
-  memoryManager
+  memoryManager,
+  memoryService
 );
 
 // Controllers
