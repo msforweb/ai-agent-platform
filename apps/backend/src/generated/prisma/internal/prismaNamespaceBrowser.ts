@@ -52,7 +52,8 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Conversation: 'Conversation',
-  Message: 'Message'
+  Message: 'Message',
+  Memory: 'Memory'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -89,6 +90,16 @@ export const MessageScalarFieldEnum = {
 } as const
 
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
+
+
+export const MemoryScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  content: 'content',
+  createdAt: 'createdAt'
+} as const
+
+export type MemoryScalarFieldEnum = (typeof MemoryScalarFieldEnum)[keyof typeof MemoryScalarFieldEnum]
 
 
 export const SortOrder = {
