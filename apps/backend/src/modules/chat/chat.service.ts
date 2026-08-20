@@ -43,7 +43,12 @@ export class ChatService {
 
     await this.chatStore.saveConversation(conversation);
 
-    const reply = await this.runtime.chat(optimizedConversation);
+    const reply = await this.runtime.chat(
+      optimizedConversation,
+      { 
+        memories: relevantMemories 
+      }
+    );
 
     conversation.messages.push({
       role: "assistant",
@@ -87,7 +92,14 @@ export class ChatService {
 
     let fullResponse = "";
 
-    for await (const chunk of this.runtime.stream(optimizedConversation)) {
+    for await (const chunk of this.runtime.stream(
+        optimizedConversation,
+        { 
+          memories: relevantMemories 
+        }
+      )
+    ) 
+    {
       const content =
         typeof chunk.content === "string"
           ? chunk.content

@@ -105,7 +105,7 @@ describe("ChatService", () => {
       .not.toHaveBeenCalled();
 
     expect(mockAgent.chat)
-      .toHaveBeenCalledWith(existingConversation);
+      .toHaveBeenCalledWith(existingConversation, {memories: []});
   });
 
   it("should stream the AI reply and save the complete response", async () => {

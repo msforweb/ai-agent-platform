@@ -1,10 +1,15 @@
 import { AIMessageChunk } from "@langchain/core/messages";
 import { Conversation } from "../../modules/chat/types/conversation.js";
+import { RuntimeContext } from "./runtime-context.js";
 
 export interface AgentRuntime {
-  chat(conversation: Conversation): Promise<string>;
+  chat(
+    conversation: Conversation,
+    context?: RuntimeContext
+  ): Promise<string>;
 
   stream(
-    conversation: Conversation
+    conversation: Conversation,
+    context?: RuntimeContext
   ): AsyncGenerator<AIMessageChunk>;
 }
