@@ -5,14 +5,14 @@ import { Conversation } from "../../../src/modules/chat/types/conversation.js";
 import { Agent } from "../../../src/ai/interfaces/agent.interface.js";
 import { ChatStore } from "../../../src/modules/chat/interfaces/chat-store.interface.js";
 import { MemoryManager } from "../../../src/ai/memory/interfaces/memory-manager.interface.js";
-import { MemoryService } from "../../../src/modules/memory/memory.service.js";
+import { RuntimeContextBuilder } from "../../../src/ai/runtime/runtime-context-builder.js";
 
 describe("ChatService", () => {
   let mockAgent: Agent;
   let mockStore: ChatStore;
   let service: ChatService;
   let mockMemoryManager: MemoryManager;
-  let mockMemoryService: MemoryService;
+  let mockRuntimeContextBuilder: RuntimeContextBuilder;
 
   beforeEach(() => {
     mockAgent = {
@@ -35,16 +35,17 @@ describe("ChatService", () => {
       prepareConversation: vi.fn(async conversation => conversation),
     };
     
-    mockMemoryService = {
-      findRelevant: vi.fn().mockResolvedValue([]),
-      remember: vi.fn().mockResolvedValue(undefined),
-    } as unknown as MemoryService;
+    mockRuntimeContextBuilder = {
+      build: vi.fn().mockResolvedValue({
+        memories: [],
+      }),
+    } as unknown as RuntimeContextBuilder;
 
     service = new ChatService(
       mockAgent,
       mockStore,
       mockMemoryManager,
-      mockMemoryService
+      mockRuntimeContextBuilder
     );
   });
 
@@ -104,9 +105,61 @@ describe("ChatService", () => {
     expect(mockStore.createConversation)
       .not.toHaveBeenCalled();
 
+    expect(mockRuntimeContextBuilder.build)
+      .toHaveBeenCalledWith("Hello again", 5);
+
     expect(mockAgent.chat)
-      .toHaveBeenCalledWith(existingConversation, {memories: []});
+      .toHaveBeenCalledWith(
+        existingConversation,
+        {
+          memories: [],
+        }
+      );
   });
+
+  it("should pass relevant memories from the runtime context builder to the agent", async () => {
+      const existingConversation: Conversation = {
+        id: "conversation-1",
+        messages: [],
+      };
+
+      const memories = [
+        {
+          id: "memory-1",
+          conversationId: "conversation-1",
+          content: "The user is building an AI agent platform.",
+          embedding: [0.1, 0.2],
+          createdAt: new Date(),
+        },
+      ];
+
+      vi.mocked(mockStore.getConversation)
+        .mockReturnValue(existingConversation);
+
+      vi.mocked(mockRuntimeContextBuilder.build)
+        .mockResolvedValue({
+          memories,
+        });
+
+      await service.chat(
+        "conversation-1",
+        "What are we building?"
+      );
+
+      expect(mockRuntimeContextBuilder.build)
+        .toHaveBeenCalledWith(
+          "What are we building?",
+          5
+        );
+
+      expect(mockAgent.chat)
+        .toHaveBeenCalledWith(
+          existingConversation,
+          {
+            memories,
+          }
+        );
+    });
 
   it("should stream the AI reply and save the complete response", async () => {
 
@@ -168,5 +221,16 @@ describe("ChatService", () => {
 
     expect(mockMemoryManager.prepareConversation)
       .toHaveBeenCalledTimes(1);  
+
+    expect(mockRuntimeContextBuilder.build)
+      .toHaveBeenCalledWith("Hi", 5);
+
+    expect(mockAgent.stream)
+      .toHaveBeenCalledWith(
+        conversation,
+        {
+          memories: [],
+        }
+      );  
   });
 });

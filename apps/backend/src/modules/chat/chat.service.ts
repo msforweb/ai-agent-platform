@@ -3,14 +3,15 @@ import { AIMessageChunk } from "@langchain/core/messages";
 import { AgentRuntime } from "../../ai/runtime/agent-runtime.js";
 import { ChatStore } from "./interfaces/chat-store.interface.js";
 import { MemoryManager } from "../../ai/memory/interfaces/memory-manager.interface.js";
-import { MemoryService } from "../memory/memory.service.js";
+//import { MemoryService } from "../memory/memory.service.js";
+import { RuntimeContextBuilder } from "../../ai/runtime/runtime-context-builder.js";
 
 export class ChatService {
   constructor(
     private readonly runtime: AgentRuntime,
     private readonly chatStore: ChatStore,
     private readonly memoryManager: MemoryManager,
-    private readonly memoryService: MemoryService
+    private readonly runtimeContextBuilder: RuntimeContextBuilder
   ) {}
 
   async chat(
@@ -29,13 +30,7 @@ export class ChatService {
       content: message,
     });
 
-    const relevantMemories =
-      await this.memoryService.findRelevant(message, 5);
-
-    console.log(
-      "Relevant memories:",
-      relevantMemories.map((memory) => memory.content)
-    );
+    const runtimeContext = await this.runtimeContextBuilder.build(message, 5);
 
     const optimizedConversation = await this.memoryManager.prepareConversation(conversation);
 
@@ -45,9 +40,7 @@ export class ChatService {
 
     const reply = await this.runtime.chat(
       optimizedConversation,
-      { 
-        memories: relevantMemories 
-      }
+      runtimeContext
     );
 
     conversation.messages.push({
@@ -76,13 +69,7 @@ export class ChatService {
       content: message,
     });
 
-    const relevantMemories =
-      await this.memoryService.findRelevant(message, 5);
-
-    console.log(
-      "Relevant memories:",
-      relevantMemories.map((memory) => memory.content)
-    );
+    const runtimeContext = await this.runtimeContextBuilder.build(message, 5);
 
     const optimizedConversation = await this.memoryManager.prepareConversation(conversation);
 
@@ -94,9 +81,7 @@ export class ChatService {
 
     for await (const chunk of this.runtime.stream(
         optimizedConversation,
-        { 
-          memories: relevantMemories 
-        }
+        runtimeContext
       )
     ) 
     {

@@ -18,6 +18,7 @@ import { LLMSummarizer } from "../ai/memory/llm-summarizer.js";
 import { LocalEmbeddingProvider } from "../modules/memory/providers/local-embedding.provider.js";
 import { PostgresMemoryStore } from "../modules/memory/stores/postgres-memory.store.js";
 import { MemoryService } from "../modules/memory/memory.service.js";
+import { RuntimeContextBuilder } from "../ai/runtime/runtime-context-builder.js";
 
 // Infrastructure
 const provider = new OpenRouterProvider();
@@ -48,12 +49,14 @@ const memoryService =
     embeddingProvider
   );
 
+  const runtimeContextBuilder = new RuntimeContextBuilder(memoryService);
+
 // Services
 const chatService = new ChatService(
   agentRuntime,
   chatStore,
   memoryManager,
-  memoryService
+  runtimeContextBuilder
 );
 
 // Controllers
