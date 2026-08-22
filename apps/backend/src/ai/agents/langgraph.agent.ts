@@ -7,32 +7,14 @@ import {
 
 import { Agent } from "../interfaces/agent.interface.js";
 import { ChatGraph } from "../graph/graphs/chat.graph.js";
+import { RuntimeContext } from "../runtime/runtime-context.js";
 
 import { Conversation } from "../../modules/chat/types/conversation.js";
-import { RuntimeContext } from "../runtime/runtime-context.js";
 
 export class LangGraphAgent implements Agent {
   constructor(
     private readonly graph: ChatGraph
   ) {}
-
-  private buildMemoryMessage(
-    context?: RuntimeContext
-  ): SystemMessage | null {
-    const memories = context?.memories;
-
-    if (!memories || memories.length === 0) {
-      return null;
-    }
-
-    const memoryContent = memories
-      .map((memory) => `- ${memory.content}`)
-      .join("\n");
-
-    return new SystemMessage(
-      `Relevant conversation memories:\n${memoryContent}`
-    );
-  }
 
   private buildMessages(
     conversation: Conversation,
@@ -51,11 +33,14 @@ export class LangGraphAgent implements Agent {
       }
     });
 
-    const memoryMessage =
-      this.buildMemoryMessage(context);
-
-    if (memoryMessage) {
-      messages.unshift(memoryMessage);
+    if (context?.memories?.length) {
+      messages.unshift(
+        new SystemMessage(
+          `Relevant memories:\n${context.memories
+            .map((memory) => `- ${memory.content}`)
+            .join("\n")}`
+        )
+      );
     }
 
     return messages;
@@ -79,10 +64,18 @@ export class LangGraphAgent implements Agent {
   }
 
   async *stream(
-    _conversation: Conversation
+    conversation: Conversation,
+    context?: RuntimeContext
   ): AsyncGenerator<AIMessageChunk> {
-    throw new Error(
-      "Streaming is not implemented for LangGraphAgent yet."
-    );
+    for await (
+      const chunk of this.graph.stream({
+        messages: this.buildMessages(
+          conversation,
+          context
+        ),
+      })
+    ) {
+      yield chunk as AIMessageChunk;
+    }
   }
 }

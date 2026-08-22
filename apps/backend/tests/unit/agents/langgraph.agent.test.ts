@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { AIMessage, HumanMessage } from "@langchain/core/messages";
+import { AIMessage, HumanMessage, AIMessageChunk } from "@langchain/core/messages";
 
 import { LangGraphAgent } from "../../../src/ai/agents/langgraph.agent.js";
 import { ChatGraph } from "../../../src/ai/graph/graphs/chat.graph.js";
@@ -91,5 +91,48 @@ describe("LangGraphAgent", () => {
 
       expect(input.messages[1].content.toString())
         .toBe("What are we building?");
+    });
+
+    it("should stream AI message chunks from the graph", async () => {
+      const graph = {
+        invoke: vi.fn(),
+
+        stream: vi.fn().mockReturnValue(
+          (async function* () {
+            yield new AIMessageChunk({
+              content: "Hello ",
+            });
+
+            yield new AIMessageChunk({
+              content: "from LangGraph",
+            });
+          })()
+        ),
+      } as unknown as ChatGraph;
+
+      const agent = new LangGraphAgent(graph);
+
+      const chunks: string[] = [];
+
+      for await (
+        const chunk of agent.stream({
+          id: "conversation-1",
+          messages: [
+            {
+              role: "user",
+              content: "Hello",
+            },
+          ],
+        })
+      ) {
+        chunks.push(chunk.content.toString());
+      }
+
+      expect(chunks).toEqual([
+        "Hello ",
+        "from LangGraph",
+      ]);
+
+      expect(graph.stream).toHaveBeenCalledOnce();
     });
 });
