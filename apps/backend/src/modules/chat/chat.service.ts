@@ -3,15 +3,19 @@ import { AIMessageChunk } from "@langchain/core/messages";
 import { AgentRuntime } from "../../ai/runtime/agent-runtime.js";
 import { ChatStore } from "./interfaces/chat-store.interface.js";
 import { MemoryManager } from "../../ai/memory/interfaces/memory-manager.interface.js";
-//import { MemoryService } from "../memory/memory.service.js";
 import { RuntimeContextBuilder } from "../../ai/runtime/runtime-context-builder.js";
+import { MemoryService } from "../memory/memory.service.js";
+import { MemoryExtractor } from "../../ai/memory/interfaces/memory-extractor.interface.js";
+import { Conversation } from "./types/conversation.js";
 
 export class ChatService {
   constructor(
     private readonly runtime: AgentRuntime,
     private readonly chatStore: ChatStore,
     private readonly memoryManager: MemoryManager,
-    private readonly runtimeContextBuilder: RuntimeContextBuilder
+    private readonly runtimeContextBuilder: RuntimeContextBuilder,
+    private readonly memoryService: MemoryService,
+    private readonly memoryExtractor: MemoryExtractor
   ) {}
 
   async chat(
@@ -49,6 +53,8 @@ export class ChatService {
     });
 
     await this.chatStore.saveConversation(conversation);
+
+    await this.saveMemories(conversation);
 
     return reply;
   }
@@ -101,5 +107,22 @@ export class ChatService {
     });
 
     await this.chatStore.saveConversation(conversation);
+  }
+
+  private async saveMemories(
+    conversation: Conversation
+  ): Promise<void> {
+
+    const memories =
+      await this.memoryExtractor.extract(
+        conversation
+      );
+
+    for (const content of memories) {
+      await this.memoryService.remember(
+        conversation.id,
+        content
+      );
+    }
   }
 }

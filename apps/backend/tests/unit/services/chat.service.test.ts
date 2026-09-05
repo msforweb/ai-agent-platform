@@ -6,6 +6,8 @@ import { Agent } from "../../../src/ai/interfaces/agent.interface.js";
 import { ChatStore } from "../../../src/modules/chat/interfaces/chat-store.interface.js";
 import { MemoryManager } from "../../../src/ai/memory/interfaces/memory-manager.interface.js";
 import { RuntimeContextBuilder } from "../../../src/ai/runtime/runtime-context-builder.js";
+import { MemoryExtractor } from "../../../src/ai/memory/interfaces/memory-extractor.interface.js";
+import { MemoryService } from "../../../src/modules/memory/memory.service.js";
 
 describe("ChatService", () => {
   let mockAgent: Agent;
@@ -13,6 +15,8 @@ describe("ChatService", () => {
   let service: ChatService;
   let mockMemoryManager: MemoryManager;
   let mockRuntimeContextBuilder: RuntimeContextBuilder;
+  let mockMemoryExtractor: MemoryExtractor;
+  let mockMemoryService: MemoryService;
 
   beforeEach(() => {
     mockAgent = {
@@ -41,11 +45,22 @@ describe("ChatService", () => {
       }),
     } as unknown as RuntimeContextBuilder;
 
+    mockMemoryExtractor = {
+      extract: vi.fn().mockResolvedValue([]),
+    };
+
+    mockMemoryService = {
+      remember: vi.fn().mockResolvedValue(undefined),
+      findRelevant: vi.fn(),
+    } as unknown as MemoryService;
+
     service = new ChatService(
       mockAgent,
       mockStore,
       mockMemoryManager,
-      mockRuntimeContextBuilder
+      mockRuntimeContextBuilder,
+      mockMemoryService,
+      mockMemoryExtractor
     );
   });
 
@@ -160,6 +175,35 @@ describe("ChatService", () => {
           }
         );
     });
+  
+  it("should extract and save memories after the AI response", async () => {
+    const conversation: Conversation = {
+      id: "conversation-1",
+      messages: [],
+    };
+
+    vi.mocked(mockStore.getConversation)
+      .mockReturnValue(conversation);
+
+    vi.mocked(mockMemoryExtractor.extract)
+      .mockResolvedValue([
+        "The user is building an AI agent platform.",
+      ]);
+
+    await service.chat(
+      "conversation-1",
+      "I am building an AI agent platform."
+    );
+
+    expect(mockMemoryExtractor.extract)
+      .toHaveBeenCalledTimes(1);
+
+    expect(mockMemoryService.remember)
+      .toHaveBeenCalledWith(
+        "conversation-1",
+        "The user is building an AI agent platform."
+      );
+  });
 
   it("should stream the AI reply and save the complete response", async () => {
 

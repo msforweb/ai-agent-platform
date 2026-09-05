@@ -28,6 +28,7 @@ import { ChatService } from "../../src/modules/chat/chat.service.js";
 
 import { LLMProvider } from "../../src/ai/interfaces/llm-provider.interface.js";
 import { Summarizer } from "../../src/ai/memory/interfaces/summarizer.interface.js";
+import { SimpleMemoryExtractor } from "../../src/ai/memory/memory-extractor.js";
 
 
 class FakeLLMProvider implements LLMProvider {
@@ -113,13 +114,18 @@ describe("Chat memory integration", () => {
 
     const agentRuntime =
       new SimpleAgentRuntime(chatAgent);
-
+    
+    const memoryExtractor =
+  new SimpleMemoryExtractor();
+  
     chatService =
       new ChatService(
         agentRuntime,
         chatStore,
         memoryManager,
-        runtimeContextBuilder
+        runtimeContextBuilder,
+        memoryService,
+        memoryExtractor
       );
 
     await prisma.conversation.create({
@@ -177,6 +183,43 @@ describe("Chat memory integration", () => {
     },
     30000
   );
+
+  it("should extract and persist a new memory after chat", async () => {
+    const conversationId =
+      `test-memory-write-${Date.now()}`;
+
+    await prisma.conversation.create({
+      data: {
+        id: conversationId,
+      },
+    });
+
+    const message =
+      "I am building a production AI agent platform.";
+
+    await chatService.chat(
+      conversationId,
+      message
+    );
+
+    const storedMemory =
+      await prisma.memory.findFirst({
+        where: {
+          conversationId,
+          content: message,
+        },
+      });
+
+    expect(storedMemory).not.toBeNull();
+
+    expect(storedMemory?.content).toBe(message);
+
+    await prisma.conversation.delete({
+      where: {
+        id: conversationId,
+      },
+    });
+  }, 30000);
 });
 
 class FakeSummarizer implements Summarizer {
